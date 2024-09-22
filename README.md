@@ -20,9 +20,8 @@ A Python-based terminal video player that converts videos into ASCII art and pla
   - `yt-dlp`
   - `numpy`
   - `keyboard`
-  - `changefontsize`
 
 You can install the required libraries using pip:
 
 ```bash
-pip install ffmpeg-python Pillow PyAudio rich yt-dlp numpy keyboard changefontsize
+pip install ffmpeg-python Pillow PyAudio rich yt-dlp numpy keyboard
