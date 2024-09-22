@@ -20,12 +20,19 @@ import numpy as np
 class muteLogger:
     def error(msg):
         pass
+    
     def warning(msg):
         pass
+    
     def debug(msg):
         pass
 
 def delete_folder(dir):
+    """Deletes the specified directory if it exists.
+    
+    Args:
+        dir (str): The path to the directory to be deleted.
+    """
     try:
         if os.path.exists(dir):
             os.rmdir(dir)
@@ -33,16 +40,36 @@ def delete_folder(dir):
         pass
 
 def compact_file(file_name):
+    """Compresses a file using Gzip.
+    
+    Args:
+        file_name (str): The name of the file to compress.
+    """
     with open(file_name, 'rb') as f_in:
         with g_open(file_name[:-4] + '.gz', 'wb') as f_out:
             copyfileobj(f_in, f_out)
 
 def unzip(file_name):
+    """Decompresses a Gzip file and saves it as a text file.
+    
+    Args:
+        file_name (str): The name of the Gzip file to decompress.
+    """
     with g_open(f"{file_name}.gz", 'rb') as f_in:
         with open(f"{file_name}.txt", 'wb') as f_out:
             copyfileobj(f_in, f_out)
 
 def yt_download(link, dir, custom_name=None):
+    """Downloads a video from YouTube and saves it to the specified directory.
+    
+    Args:
+        link (str): The URL of the YouTube video.
+        dir (str): The directory to save the downloaded video.
+        custom_name (str, optional): Custom name for the saved video. Defaults to None.
+    
+    Returns:
+        tuple: A tuple containing a success flag, the video title, and the video extension.
+    """
     outtmpl = f'{dir}/{"%(title)s" if not custom_name else custom_name}.%(ext)s'
     
     ydl_opts = {
@@ -65,6 +92,11 @@ console = Console()
 
 class TerminalPlayer:
     def __init__(self, path) -> None:
+        """Initializes the TerminalPlayer with a specified path.
+        
+        Args:
+            path (str): The base path for the player.
+        """
         self.BRIGHTNESS_LEVELS_LOW = " .-+*wGHM#&%@"
         self.BRIGHTNESS_LEVELS_HIGH = "          .-':_,^=;><+!rc*/z?sLTv)J7(|F{C}fI31tlu[neoZ5Yxya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@██████████████"
         self.playing = False
@@ -72,12 +104,28 @@ class TerminalPlayer:
         self.stop = False
 
     def ensure_tmp_directory(self, dir_name):
-        """Certifica-se de que o diretório temporário existe."""
+        """Ensures that the temporary directory exists.
+        
+        Args:
+            dir_name (str): The name of the temporary directory.
+        
+        Returns:
+            str: The path to the temporary directory.
+        """
         tmp_path = os.path.join(self.path, "tmp", dir_name)
         os.makedirs(tmp_path, exist_ok=True)
         return tmp_path
 
     def save_configs(self, config: dict, dir_name):
+        """Saves the specified configuration dictionary to a JSON file.
+        
+        Args:
+            config (dict): The configuration data to save.
+            dir_name (str): The name of the directory to save the config in.
+        
+        Raises:
+            Exception: If an unexpected error occurs during saving.
+        """
         tmp_path = self.ensure_tmp_directory(dir_name)
         while True:
             try:
@@ -88,6 +136,18 @@ class TerminalPlayer:
                 raise Exception(f"Unexpected error: {e}")
 
     def load_configs(self, dir_name):
+        """Loads the configuration data from a JSON file.
+        
+        Args:
+            dir_name (str): The name of the directory containing the config.
+        
+        Returns:
+            dict: The loaded configuration data.
+        
+        Raises:
+            FileNotFoundError: If the config file is not found.
+            Exception: If an unexpected error occurs during loading.
+        """
         tmp_path = self.ensure_tmp_directory(dir_name)
         while True:
             try:
@@ -100,6 +160,15 @@ class TerminalPlayer:
                 raise Exception(f"Unexpected error: {e}")
 
     def save_frames_to_txt(self, frames_ascii, dir_name):
+        """Saves the ASCII frames to a text file.
+        
+        Args:
+            frames_ascii (list): A list of ASCII frames to save.
+            dir_name (str): The name of the directory to save the frames in.
+        
+        Raises:
+            Exception: If an unexpected error occurs during saving.
+        """
         tmp_path = self.ensure_tmp_directory(dir_name)
         while True:
             try:
@@ -111,6 +180,18 @@ class TerminalPlayer:
                 raise Exception(f"Unexpected error: {e}")
 
     def load_frames_from_txt(self, dir_name):
+        """Loads ASCII frames from a text file.
+        
+        Args:
+            dir_name (str): The name of the directory containing the frames.
+        
+        Returns:
+            list: A list of loaded ASCII frames.
+        
+        Raises:
+            FileNotFoundError: If the frames file is not found.
+            Exception: If an unexpected error occurs during loading.
+        """
         tmp_path = self.ensure_tmp_directory(dir_name)
         while True:
             try:
@@ -125,9 +206,19 @@ class TerminalPlayer:
                 raise Exception(f"Unexpected error: {e}")
 
     def move_cursor_to_top(self):
+        """Moves the terminal cursor to the top of the screen."""
         print('\033[H', end='')
 
     def convert_to_ascii(self, image, brightnessLevels):
+        """Converts an image to an ASCII representation based on brightness levels.
+        
+        Args:
+            image (PIL.Image): The image to convert.
+            brightnessLevels (str): A string of characters representing brightness levels.
+        
+        Returns:
+            str: The ASCII representation of the image.
+        """
         grayscale_image = image.convert("L")
 
         pixels = np.array(grayscale_image)
@@ -140,6 +231,14 @@ class TerminalPlayer:
         return "\n".join("".join(row) for row in ascii_image)
 
     def extract_frames_and_audio(self, input_filename, target_frame_width, target_frame_height, dir_name):
+        """Extracts frames and audio from a video file.
+        
+        Args:
+            input_filename (str): The path to the input video file.
+            target_frame_width (int): The width of the extracted frames.
+            target_frame_height (int): The height of the extracted frames.
+            dir_name (str): The name of the directory to store extracted frames and audio.
+        """
         tmp_path = self.ensure_tmp_directory(dir_name)
         os.makedirs(os.path.join(tmp_path, "frames"), exist_ok=True)
         (
@@ -154,6 +253,11 @@ class TerminalPlayer:
         ffmpeg.input(input_filename).output(os.path.join(tmp_path, "audio.wav")).run(overwrite_output=True)
 
     def play_audio(self, dir_name):
+        """Plays the audio extracted from the video file.
+        
+        Args:
+            dir_name (str): The name of the directory containing the audio file.
+        """
         tmp_path = self.ensure_tmp_directory(dir_name)
         wf = wave.open(os.path.join(tmp_path, "audio.wav"), 'rb')
         p = pyaudio.PyAudio()
@@ -174,27 +278,33 @@ class TerminalPlayer:
         self.playing = False
 
     def escape(self):
+        """Stops the audio playback."""
         self.stop = True
 
     def start_hotkeyts(self):
+        """Sets up a hotkey to stop audio playback on pressing 'Q'."""
         add_hotkey('q', self.escape)
-
         wait()
 
     def load_video(self):
+        """Loads a video project from the temporary directory.
+        
+        Returns:
+            tuple: A tuple containing ASCII frames, video information, and the directory name.
+        """
         os.makedirs(os.path.join(self.path, "tmp"), exist_ok=True)
-        avaliable = os.listdir(os.path.join(self.path, "tmp"))
-        avlist = "[bold yellow]Avaliable projects:[/]\n"
+        available = os.listdir(os.path.join(self.path, "tmp"))
+        avlist = "[bold yellow]Available projects:[/]\n"
 
-        for index, item in enumerate(avaliable):
+        for index, item in enumerate(available):
             if not os.path.isdir(os.path.join(self.path, "tmp", item)):
-                avaliable.pop(index)
+                available.pop(index)
 
-        if avaliable:
-            for dir in avaliable:
+        if available:
+            for dir in available:
                 avlist += f"\n[bold white]- {dir}"
         else:
-            avlist += f"\n[bold white]- No projects avaliable."
+            avlist += f"\n[bold white]- No projects available."
 
         console.print(Panel(avlist))
 
@@ -202,7 +312,7 @@ class TerminalPlayer:
             dir_name = console.input("\n[yellow][INPUT][/] [bold white]Enter the name used to save the project: ")
             target = os.path.join(self.path, "tmp", dir_name, "frames_ascii")
             if not os.path.exists(os.path.join(self.path, "tmp", dir_name)):
-                console.print(f"[bold red][ERROR][/] [bold white]This name is not avaliable in the tmp directory!")
+                console.print(f"[bold red][ERROR][/] [bold white]This name is not available in the tmp directory!")
                 continue
             break
         unzip(target)
@@ -215,6 +325,11 @@ class TerminalPlayer:
         return frames_ascii, vid_info, dir_name
     
     def create_video(self):
+        """Creates a new video from user inputs or a YouTube URL.
+        
+        Returns:
+            tuple: A tuple containing ASCII frames, video information, and the directory name.
+        """
         console.print("\n[bold yellow][INFO][/] [bold white]The size of the window will change the video quality!")
         while True:
             try:
@@ -226,12 +341,12 @@ class TerminalPlayer:
         brightnessLevels = self.BRIGHTNESS_LEVELS_LOW if choose == 1 else self.BRIGHTNESS_LEVELS_HIGH
 
         while True:
-            dir_name = console.input("[bold yellow][INPUT][bold white] Enter a name to the exported files directory: ")
+            dir_name = console.input("[bold yellow][INPUT][bold white] Enter a name for the exported files directory: ")
             if dir_name:
                 break
             console.print("[bold red][ERROR][/] [bold white]Please insert a valid name![/]")
 
-        chooseyt = console.input("[bold green][OPTION][/] Do you want to use an Youtube URL? [Y/N] ")
+        chooseyt = console.input("[bold green][OPTION][/] Do you want to use a YouTube URL? [Y/N] ")
 
         if chooseyt in ['y', 'yes', 'sim', 's']:
             while True:
@@ -314,6 +429,7 @@ class TerminalPlayer:
         return frames_ascii, vid_info, dir_name
 
     def main(self):
+        """Main function to control the video playback and frame handling."""
         console.print("[bold yellow][INFO][/] The imported frames will follow the resolution which the frames were processed!")
         load_choice = console.input("[bold green][OPTIONS][/] [bold white]Do you want to import frames? (Y/N): ")
         
